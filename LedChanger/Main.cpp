@@ -8,9 +8,10 @@
 #define RESERVE_HEX 0x00 //for reserved or filler hex
 #define NUMBER_OF_LEDS 0x01 //how many leds to configure at once. currently only configured for one at a time
 #define LED_NUMBER 0x0A //for choosing the led number to change
-#define LED_DATA_1 0x00 //part 1 of 3 for the led data
-#define LED_DATA_2 0x06 //part 2 of 3 for the led data
-#define LED_DATA_3 0x24 //part 3 of 3 for the led data
+#define LED_DATA_1 0xFF //part 1 of 3 for the led data
+#define LED_DATA_2 0xFF //part 2 of 3 for the led data
+#define LED_DATA_3 0xC8 //part 3 of 3 for the led data
+
 
 int main(){
 	std::cout << "Hello World!" << std::endl;
