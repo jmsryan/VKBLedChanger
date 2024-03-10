@@ -42,7 +42,9 @@ struct Struct1
 	char    title[256];
 	double  kohlsmann;
 	double  altitude;
-	double	gear;
+	double	gear1;
+	double	gear2;
+	double	gear0;
 	double  latitude;
 	double  longitude;
 };
@@ -100,16 +102,34 @@ void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void* pCont
 			Struct1* pS = (Struct1*)&pObjData->dwData;
 			if (SUCCEEDED(StringCbLengthA(&pS->title[0], sizeof(pS->title), NULL))) // security check
 			{
-				printf("\nObjectID=%d  Title=\"%s\"\nLat=%f  Lon=%f  Alt=%f  Kohlsman=%.2f Gear Position=%.2f", ObjectID, pS->title, pS->latitude, pS->longitude, pS->altitude, pS->kohlsmann, pS->gear);
-				std::cout << std::endl << pS->gear << std::endl;
-				if (pS->gear == 1) {
+				printf("\nObjectID=%d  Title=\"%s\"\nLat=%f  Lon=%f  Alt=%f  Kohlsman=%.2f Gear Position=%.2f", ObjectID, pS->title, pS->latitude, pS->longitude, pS->altitude, pS->kohlsmann, pS->gear1);
+				std::cout << std::endl << pS->gear1 << std::endl;
+				if (pS->gear1 == 1) {
 					testcode(GREEN_LED_DATA_1, GREEN_LED_DATA_2, GREEN_LED_DATA_3, LED_LEFT_GEAR);
 				}
-				else if (pS->gear == 0) {
+				else if (pS->gear1 == 0) {
 					testcode(0, 0, 0, LED_LEFT_GEAR);
 				}
 				else {
 					testcode(RED_LED_DATA_1, RED_LED_DATA_2, RED_LED_DATA_3, LED_LEFT_GEAR);
+				}
+				if (pS->gear2 == 1) {
+					testcode(GREEN_LED_DATA_1, GREEN_LED_DATA_2, GREEN_LED_DATA_3, LED_RIGHT_GEAR);
+				}
+				else if (pS->gear2 == 0) {
+					testcode(0, 0, 0, LED_RIGHT_GEAR);
+				}
+				else {
+					testcode(RED_LED_DATA_1, RED_LED_DATA_2, RED_LED_DATA_3, LED_RIGHT_GEAR);
+				}
+				if (pS->gear0 == 1) {
+					testcode(GREEN_LED_DATA_1, GREEN_LED_DATA_2, GREEN_LED_DATA_3, LED_MIDDLE_GEAR);
+				}
+				else if (pS->gear0 == 0) {
+					testcode(0, 0, 0, LED_MIDDLE_GEAR);
+				}
+				else {
+					testcode(RED_LED_DATA_1, RED_LED_DATA_2, RED_LED_DATA_3, LED_MIDDLE_GEAR);
 				}
 			}
 			break;
@@ -174,6 +194,8 @@ void testDataRequest() {
 		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Kohlsman setting hg", "inHg");
 		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Altitude", "feet");
 		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:1","Percent Over 100");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:2", "Percent Over 100");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:0", "Percent Over 100");
 		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Latitude", "degrees");
 		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Longitude", "degrees");
 
