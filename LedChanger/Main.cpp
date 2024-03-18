@@ -65,6 +65,79 @@ static enum DATA_REQUEST_ID {
 
 void testcode(char data1, char data2, char data3, char lednum);
 
+void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void* pContext);
+
+void testcode(char data1, char data2, char data3, char lednum);
+
+void testDataRequest();
+
+int main() {
+	std::cout << "Hello World!" << std::endl;
+	//testcode(GREEN_LED_DATA_1, GREEN_LED_DATA_2, GREEN_LED_DATA_3, LED_LEFT_GEAR);
+	testDataRequest();
+	return 0;
+}
+
+void testDataRequest() {
+	HRESULT hr;
+	if (SUCCEEDED(SimConnect_Open(&hSimConnect, "Request Data", NULL, 0, 0, 0)))
+	{
+		printf("\nConnected to Flight Simulator!");
+
+		// Set up the data definition, but do not yet do anything with it
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Title", NULL, SIMCONNECT_DATATYPE_STRING256);
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Kohlsman setting hg", "inHg");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Altitude", "feet");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:1", "Percent Over 100");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:2", "Percent Over 100");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:0", "Percent Over 100");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Latitude", "degrees");
+		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Longitude", "degrees");
+
+		// Request an event when the simulation starts
+		hr = SimConnect_SubscribeToSystemEvent(hSimConnect, EVENT_SIM_START, "6Hz");
+
+		printf("\nLaunch a flight.");
+
+		while (0 == quit)
+		{
+			SimConnect_CallDispatch(hSimConnect, MyDispatchProcRD, NULL);
+			Sleep(1);
+		}
+
+		hr = SimConnect_Close(hSimConnect);
+	}
+
+}
+
+void testcode(char data1, char data2, char data3, char lednum) {
+	hid_init();
+	hid_device_info* firstpointer = hid_enumerate(VID, 0);
+	hid_device_info firstdevice = *firstpointer;
+	hid_device* device1 = hid_open(VID, PID2, NULL);
+	unsigned char report[12];
+	report[0] = REPORT_ID;
+	report[1] = REPORT_COMMAND_PART_ONE;
+	report[2] = REPORT_COMMAND_PART_TWO;
+	report[3] = RESERVE_HEX;
+	report[4] = RESERVE_HEX;
+	report[5] = RESERVE_HEX;
+	report[6] = RESERVE_HEX;
+	report[7] = NUMBER_OF_LEDS; //end of header for one led chunk
+	report[8] = lednum; //led number
+	report[9] = data1;
+	report[10] = data2;
+	report[11] = data3;
+	hid_send_feature_report(device1, report, sizeof(report));
+
+	//std::string a = "59A50ABBA2260C0100000624";
+	//hid_write(device1,reinterpret_cast<const unsigned char*>(a.c_str()), 12);
+	std::cout << std::hex << firstdevice.product_id << std::endl;
+	hid_close(device1);
+	hid_exit();
+	return;
+}
+
 void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void* pContext)
 {
 	HRESULT hr;
@@ -152,74 +225,4 @@ void CALLBACK MyDispatchProcRD(SIMCONNECT_RECV* pData, DWORD cbData, void* pCont
 		printf("\nReceived:%d", pData->dwID);
 		break;
 	}
-}
-
-void testcode(char data1,char data2, char data3, char lednum) {
-	hid_init();
-	hid_device_info* firstpointer = hid_enumerate(VID, 0);
-	hid_device_info firstdevice = *firstpointer;
-	hid_device* device1 = hid_open(VID, PID2, NULL);
-	unsigned char report[12];
-	report[0] = REPORT_ID;
-	report[1] = REPORT_COMMAND_PART_ONE;
-	report[2] = REPORT_COMMAND_PART_TWO;
-	report[3] = RESERVE_HEX;
-	report[4] = RESERVE_HEX;
-	report[5] = RESERVE_HEX;
-	report[6] = RESERVE_HEX;
-	report[7] = NUMBER_OF_LEDS; //end of header for one led chunk
-	report[8] = lednum; //led number
-	report[9] = data1;
-	report[10] = data2;
-	report[11] = data3;
-	hid_send_feature_report(device1, report, sizeof(report));
-
-	//std::string a = "59A50ABBA2260C0100000624";
-	//hid_write(device1,reinterpret_cast<const unsigned char*>(a.c_str()), 12);
-	std::cout << std::hex << firstdevice.product_id << std::endl;
-	hid_close(device1);
-	hid_exit();
-	return;
-}
-
-
-void testDataRequest() {
-	HRESULT hr;
-	if (SUCCEEDED(SimConnect_Open(&hSimConnect, "Request Data", NULL, 0, 0, 0)))
-	{
-		printf("\nConnected to Flight Simulator!");
-
-		// Set up the data definition, but do not yet do anything with it
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Title", NULL, SIMCONNECT_DATATYPE_STRING256);
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Kohlsman setting hg", "inHg");
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Altitude", "feet");
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:1","Percent Over 100");
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:2", "Percent Over 100");
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Gear Position:0", "Percent Over 100");
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Latitude", "degrees");
-		hr = SimConnect_AddToDataDefinition(hSimConnect, DEFINITION_1, "Plane Longitude", "degrees");
-
-		// Request an event when the simulation starts
-		hr = SimConnect_SubscribeToSystemEvent(hSimConnect, EVENT_SIM_START, "6Hz");
-
-		printf("\nLaunch a flight.");
-
-		while (0 == quit)
-		{
-			SimConnect_CallDispatch(hSimConnect, MyDispatchProcRD, NULL);
-			Sleep(1);
-		}
-
-		hr = SimConnect_Close(hSimConnect);
-	}
-
-}
-
-
-
-int main() {
-	std::cout << "Hello World!" << std::endl;
-	//testcode(GREEN_LED_DATA_1, GREEN_LED_DATA_2, GREEN_LED_DATA_3, LED_LEFT_GEAR);
-	testDataRequest();
-	return 0;
 }
